@@ -11,10 +11,14 @@ $(() => {
     };
 
     let token = readCookie("token");
+
     if (isWechat) {
+
         if($.urlParam("token")){
-            document.location.replace('index.html#?token=' + $.urlParam("token"));
+            createCookie("token", token, 144000);
+            document.location.replace('index.html');
         } //fix a weird bug with wechat
+
         if (!token && /\?token=(.+)/.test(document.location.hash)) {
             token = RegExp.$1;
             createCookie("token", token, 144000);
