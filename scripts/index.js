@@ -122,7 +122,7 @@ function addCard(id, name, url, term) {
 
 function cardClick(e) {
     if (isWechat){
-        let wechatGroup = $(e.currentTarget).attr('data-url')
+        //let wechatGroup = $(e.currentTarget).attr('data-url')
         alert("请长按卡片加群")
     } else {
         alert("请保存图片，在微信扫一扫中选择相册打开。");
@@ -153,7 +153,7 @@ function onSignIn(googleUser) {
     $.ajax({url: api + "auth/", type: "POST",
             data: {email: email}, success: (response) => {
         createCookie("token", response.token, 144000);
-        document.location.hash = '?token='+ response.token
+        document.location.hash = '?token='+ response.token;
         if ($.urlParam("redirect") === "add") {
             window.location.href = "add.html";
         } else if ($.urlParam("redirect") === "queue") {
