@@ -15,6 +15,7 @@ $(() => {
     if (isWechat) {
 
         if($.urlParam("token")){
+            token = $.urlParam("token")
             createCookie("token", token, 144000);
             document.location.replace('index.html');
         } //fix a weird bug with wechat
@@ -273,7 +274,8 @@ function loadCourses(token) {
         console.log(response);
         if (response.status===401) {
             deleteCookie("token")
-            window.location.replace("index.html?timeout=1")
+            alert("会话过期，请重新登陆。")
+            window.location.replace("index.html")
         }
     }});
 }
@@ -297,5 +299,5 @@ function readCookie(name) {
 }
 
 function deleteCookie(name) {
-    document.cookie = encodeURIComponent(name) + "= ; expires = Thu, 01 Jan 1970 00:00:00 GMT"
+    document.cookie = encodeURIComponent(name) + "= ; expires = Thu, 01 Jan 1970 00:00:00 GMT; path=/"
 }
