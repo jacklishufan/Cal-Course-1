@@ -12,7 +12,7 @@ $(() => {
     $("#search-input").on("input", () => {
         filter();
     });
-    
+
     $(".about-toggle").on("click", () => {
         $("#about-container").toggleClass("hidden");
     });
@@ -40,18 +40,30 @@ $(() => {
     if (token) {
         loadCourses(token);
     } else {
-        gapi.load('auth2', () => {
-            auth2 = gapi.auth2.init({
-                client_id: '707915550129-7l94p2dpplaoub3d6clhrjpivki6dqpe.apps.googleusercontent.com',
-                cookiepolicy: 'single_host_origin'
-            });
-            auth2.attachClickHandler($("#login-button")[0], {}, onSignIn, (error) => {
-                if (error.error.indexOf("closed by user") == -1) {
-                    alert("无法登陆，请稍后再试。");
-                    console.log(error.error);
-                }
-            });
-        });    
+        var script = document.createElement('script');
+        script.src = 'https://apis.google.com/js/platform.js';
+        script.onload = script.onreadystatechange = function () {
+
+            if (!this.readyState || this.readyState == 'loaded' || this.readyState == 'complete') {
+
+                gapi.load('auth2', () => {
+                    auth2 = gapi.auth2.init({
+                        client_id: '707915550129-7l94p2dpplaoub3d6clhrjpivki6dqpe.apps.googleusercontent.com',
+                        cookiepolicy: 'single_host_origin'
+                    });
+                    auth2.attachClickHandler($("#login-button")[0], {}, onSignIn, (error) => {
+                        if (error.error.indexOf("closed by user") == -1) {
+                            alert("无法登陆，请稍后再试。");
+                            console.log(error.error);
+                        }
+                    });
+                });
+
+            }
+
+        };
+        script.type = 'text/javascript';
+        document.getElementsByTagName('head')[0].appendChild(script);
     }
 });
 
@@ -67,7 +79,7 @@ let entityMap = {
     '`': '&#x60;',
     '=': '&#x3D;'
 };
-  
+
 function escapeHtml(string) {
     return String(string).replace(/[&<>"'`=\/]/g, function (s) {
         return entityMap[s];
@@ -129,7 +141,7 @@ function onSignIn(googleUser) {
     let email = profile.getEmail();
     $.ajax({url: api + "auth/", type: "POST",
             data: {email: email}, success: (response) => {
-        createCookie("token", response.token, 60);
+        createCookie("token", response.token, 144000);
         if ($.urlParam("redirect") === "add") {
             window.location.href = "add.html";
         } else if ($.urlParam("redirect") === "queue") {
