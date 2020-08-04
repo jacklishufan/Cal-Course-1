@@ -1,9 +1,25 @@
 let api = "https://backend.calcourse.richardyrh.com/api/v1/";
 let cookiesLoaded = false;
-let isWechat = /micromessenger/.test(navigator.userAgent.toLowerCase())
+let isWechat = /micromessenger/.test(navigator.userAgent.toLowerCase());
+
 $(() => {
+    $.urlParam = (name) => {
+        let results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+        if (results && results.length >= 2) {
+            return results[1] || 0;
+        }
+    };
+
     let token = readCookie("token");
+
     if (isWechat) {
+
+        if($.urlParam("token")){
+            token = $.urlParam("token")
+            createCookie("token", token, 144000);
+            document.location.replace('index.html');
+        } //fix a weird bug with wechat
+
         if (!token && /\?token=(.+)/.test(document.location.hash)) {
             token = RegExp.$1;
             createCookie("token", token, 144000);
@@ -32,12 +48,7 @@ $(() => {
         $("#cookies-container").toggleClass("hidden");
     });
 
-    $.urlParam = (name) => {
-        let results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
-        if (results && results.length >= 2) {
-            return results[1] || 0;
-        }
-    }
+
 
     if ($.urlParam("timeout")) {
         $("#login-wrapper>div:first-child").text("会话过期，请重新登陆。");
@@ -263,7 +274,8 @@ function loadCourses(token) {
         console.log(response);
         if (response.status===401) {
             deleteCookie("token")
-            window.location.replace("index.html?timeout=1")
+            alert("会话过期，请重新登陆。")
+            window.location.replace("index.html")
         }
     }});
 }
@@ -287,5 +299,5 @@ function readCookie(name) {
 }
 
 function deleteCookie(name) {
-    document.cookie = encodeURIComponent(name) + "= ; expires = Thu, 01 Jan 1970 00:00:00 GMT"
+    document.cookie = encodeURIComponent(name) + "= ; expires = Thu, 01 Jan 1970 00:00:00 GMT; path=/"
 }
