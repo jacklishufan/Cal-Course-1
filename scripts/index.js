@@ -1,9 +1,20 @@
 let api = "https://backend.calcourse.richardyrh.com/api/v1/";
 let cookiesLoaded = false;
 let isWechat = /micromessenger/.test(navigator.userAgent.toLowerCase())
+isWechat = true
 $(() => {
+    $.urlParam = (name) => {
+        let results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+        if (results && results.length >= 2) {
+            return results[1] || 0;
+        }
+    };
+
     let token = readCookie("token");
     if (isWechat) {
+        if($.urlParam("token")){
+            document.location.replace('index.html#?token=' + $.urlParam("token"));
+        } //fix a weird bug with wechat
         if (!token && /\?token=(.+)/.test(document.location.hash)) {
             token = RegExp.$1;
             createCookie("token", token, 144000);
@@ -32,12 +43,7 @@ $(() => {
         $("#cookies-container").toggleClass("hidden");
     });
 
-    $.urlParam = (name) => {
-        let results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
-        if (results && results.length >= 2) {
-            return results[1] || 0;
-        }
-    }
+
 
     if ($.urlParam("timeout")) {
         $("#login-wrapper>div:first-child").text("会话过期，请重新登陆。");
