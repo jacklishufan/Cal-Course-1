@@ -1,10 +1,17 @@
 let api = "https://backend.calcourse.richardyrh.com/api/v1/";
 let cookiesLoaded = false;
-
+let isWechat = /micromessenger/.test(navigator.userAgent.toLowerCase())
 $(() => {
-    if (/micromessenger/.test(navigator.userAgent.toLowerCase())) {
-        $("#wechat-message").removeClass("hidden");
-        return;
+    let token = readCookie("token");
+    if (isWechat) {
+        if (!token && /\?token=(.+)/.test(document.location.hash)) {
+            token = RegExp.$1;
+            createCookie("token", token, 144000);
+            document.location.hash = '';
+        } else if (!token) {
+            $("#wechat-message").removeClass("hidden");
+            return;
+        }
     }
 
     $("#login-wrapper").removeClass("hidden");
@@ -36,7 +43,6 @@ $(() => {
         $("#login-wrapper>div:first-child").text("会话过期，请重新登陆。");
     }
 
-    let token = readCookie("token");
     if (token) {
         loadCourses(token);
     } else {
@@ -115,10 +121,15 @@ function addCard(id, name, url, term) {
 }
 
 function cardClick(e) {
-    alert("请保存图片，在微信扫一扫中选择相册打开。");
-    let img = $(e.currentTarget).find("img").attr("src");
-    // img = img.substring(img.indexOf(",") + 1);
-    window.location.href = img;
+    if (isWechat){
+        let wechatGroup = $(e.currentTarget).attr('data-url')
+        alert("请长按卡片加群")
+    } else {
+        alert("请保存图片，在微信扫一扫中选择相册打开。");
+        let img = $(e.currentTarget).find("img").attr("src");
+        // img = img.substring(img.indexOf(",") + 1);
+        window.location.href = img;
+    }
 }
 
 function filter() {
@@ -142,6 +153,7 @@ function onSignIn(googleUser) {
     $.ajax({url: api + "auth/", type: "POST",
             data: {email: email}, success: (response) => {
         createCookie("token", response.token, 144000);
+        document.location.hash = '?token='+ response.token
         if ($.urlParam("redirect") === "add") {
             window.location.href = "add.html";
         } else if ($.urlParam("redirect") === "queue") {
@@ -249,6 +261,10 @@ function loadCourses(token) {
         }
     }, error: (response) => {
         console.log(response);
+        if (response.status===401) {
+            deleteCookie("token")
+            window.location.replace("index.html?timeout=1")
+        }
     }});
 }
 
@@ -268,4 +284,8 @@ function readCookie(name) {
         }
     }
     return null;
+}
+
+function deleteCookie(name) {
+    document.cookie = encodeURIComponent(name) + "= ; expires = Thu, 01 Jan 1970 00:00:00 GMT"
 }
